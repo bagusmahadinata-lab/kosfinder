@@ -4,10 +4,11 @@ import '../models/kos_model.dart';
 /// Repository untuk mengakses tabel 'kos' di Supabase PostgreSQL.
 /// Penegakan hak akses (siapa boleh edit/hapus) diatur oleh Row Level Security (RLS).
 class KosRepository {
-  final SupabaseClient _client;
+  final SupabaseClient? client;
 
-  KosRepository({SupabaseClient? client})
-      : _client = client ?? Supabase.instance.client;
+  KosRepository({this.client});
+
+  SupabaseClient get _dbClient => client ?? Supabase.instance.client;
 
   /// Mengambil semua kos aktif untuk katalog publik pencari.
   Future<List<KosModel>> getActiveKos({
@@ -15,7 +16,7 @@ class KosRepository {
     double? maxPrice,
     List<String>? facilities,
   }) async {
-    var query = _client.from('kos').select().eq('is_active', true);
+    var query = _dbClient.from('kos').select().eq('is_active', true);
 
     if (searchArea != null && searchArea.trim().isNotEmpty) {
       final term = '%${searchArea.trim()}%';
@@ -39,14 +40,14 @@ class KosRepository {
   /// Mengambil detail satu kos berdasarkan ID.
   Future<KosModel?> getKosById(String id) async {
     final response =
-        await _client.from('kos').select().eq('id', id).maybeSingle();
+        await _dbClient.from('kos').select().eq('id', id).maybeSingle();
     if (response == null) return null;
     return KosModel.fromJson(response);
   }
 
   /// Mengambil semua kos milik pemilik yang sedang login.
   Future<List<KosModel>> getOwnerKos(String ownerId) async {
-    final response = await _client
+    final response = await _dbClient
         .from('kos')
         .select()
         .eq('owner_id', ownerId)
@@ -59,13 +60,13 @@ class KosRepository {
   /// Menambah kos baru. Hanya user terotentikasi yang diizinkan (RLS).
   Future<KosModel> createKos(KosModel kos) async {
     final response =
-        await _client.from('kos').insert(kos.toJson()).select().single();
+        await _dbClient.from('kos').insert(kos.toJson()).select().single();
     return KosModel.fromJson(response);
   }
 
   /// Memperbarui data kos. Hanya pemilik sah yang diizinkan (RLS).
   Future<KosModel> updateKos(KosModel kos) async {
-    final response = await _client
+    final response = await _dbClient
         .from('kos')
         .update(kos.toJson())
         .eq('id', kos.id)
@@ -76,6 +77,6 @@ class KosRepository {
 
   /// Menghapus kos. Hanya pemilik sah yang diizinkan (RLS).
   Future<void> deleteKos(String id) async {
-    await _client.from('kos').delete().eq('id', id);
+    await _dbClient.from('kos').delete().eq('id', id);
   }
 }

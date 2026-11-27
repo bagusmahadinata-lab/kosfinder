@@ -1,30 +1,50 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:kosfinder/main.dart';
+import 'package:kosfinder/models/kos_model.dart';
+import 'package:kosfinder/repositories/kos_repository.dart';
+
+class MockTestKosRepository extends KosRepository {
+  @override
+  Future<List<KosModel>> getActiveKos({
+    String? searchArea,
+    double? maxPrice,
+    List<String>? facilities,
+  }) async {
+    return [
+      const KosModel(
+        id: 'kos-test-1',
+        ownerId: 'owner-test',
+        name: 'Kos Test Asri',
+        address: 'Jl. Kampus Bawah',
+        area: 'Singaraja',
+        price: 900000,
+        rentalPeriod: 'monthly',
+        type: 'putra',
+        whatsappNumber: '081234567890',
+        facilities: ['WiFi'],
+        totalRooms: 5,
+        availableRooms: 3,
+      ),
+    ];
+  }
+}
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('HomeScreen menampilkan judul dan kartu kos (US01-AC1)',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      KosFinderApp(kosRepository: MockTestKosRepository()),
+    );
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // Judul App Bar
+    expect(find.text('KosFinder'), findsOneWidget);
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    // Tunggu post frame callback fetchActiveKos
+    await tester.pumpAndSettle();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Verifikasi nama kos dan badge tipe muncul
+    expect(find.text('Kos Test Asri'), findsOneWidget);
+    expect(find.text('PUTRA'), findsOneWidget);
+    expect(find.text('Sisa 3 Kamar'), findsOneWidget);
   });
 }
