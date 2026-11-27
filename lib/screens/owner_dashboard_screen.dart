@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import '../models/kos_model.dart';
 import '../providers/auth_provider.dart';
 import '../providers/kos_provider.dart';
 import 'kos_form_screen.dart';
 
-/// Halaman Dashboard Pemilik Kos untuk melihat dan mengelola kos miliknya sendiri.
+/// Halaman Dashboard Pemilik Kos untuk melihat, mengubah, menonaktifkan, dan menghapus kos miliknya sendiri.
 class OwnerDashboardScreen extends StatefulWidget {
   const OwnerDashboardScreen({super.key});
 
@@ -23,6 +24,49 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
         context.read<KosProvider>().fetchOwnerKos(user.id);
       }
     });
+  }
+
+  /// Menampilkan dialog konfirmasi hapus permanen (US07-AC1).
+  Future<void> _confirmDelete(BuildContext context, KosModel kos) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Konfirmasi Hapus'),
+        content: Text(
+          'Apakah Anda yakin ingin menghapus "${kos.name}" secara permanen? Data yang dihapus tidak dapat dipulihkan.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Hapus Permanen'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      final kosProvider = context.read<KosProvider>();
+      final success = await kosProvider.deleteKos(kos.id);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              success
+                  ? 'Kos "${kos.name}" berhasil dihapus.'
+                  : (kosProvider.errorMessage ?? 'Gagal menghapus kos.'),
+            ),
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -93,65 +137,81 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Header Kartu: Nama & Switch Toggle Nonaktif (US07-AC2)
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
-                            child: Text(
-                              kos.name,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  kos.name,
+                                  style: const TextStyle(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '${kos.area} • ${kos.address}',
+                                  style: const TextStyle(
+                                    color: Colors.black54,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: kos.isActive
-                                  ? Colors.green.shade50
-                                  : Colors.orange.shade50,
-                              borderRadius: BorderRadius.circular(6),
-                              border: Border.all(
-                                color: kos.isActive
-                                    ? Colors.green
-                                    : Colors.orange,
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Switch(
+                                value: kos.isActive,
+                                activeThumbColor: Colors.green,
+                                onChanged: (val) {
+                                  kosProvider.toggleKosActive(kos);
+                                },
                               ),
-                            ),
-                            child: Text(
-                              kos.isActive ? 'Aktif' : 'Nonaktif',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: kos.isActive
-                                    ? Colors.green.shade800
-                                    : Colors.orange.shade800,
-                                fontWeight: FontWeight.bold,
+                              Text(
+                                kos.isActive ? 'Publik (Aktif)' : 'Nonaktif',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: kos.isActive
+                                      ? Colors.green.shade700
+                                      : Colors.orange.shade800,
+                                ),
                               ),
-                            ),
+                            ],
                           ),
                         ],
                       ),
-                      const SizedBox(height: 6),
-                      Text(
-                        '${kos.area} • ${kos.address}',
-                        style: const TextStyle(color: Colors.black54, fontSize: 13),
-                      ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 8),
                       Text(
                         '${currencyFormatter.format(kos.price)} / ${kos.rentalPeriodLabel} • Sisa ${kos.availableRooms} kamar',
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.bold,
+                          fontSize: 14,
                         ),
                       ),
-                      const Divider(height: 24),
+                      const Divider(height: 20),
+
+                      // Baris Aksi: Ubah & Hapus (US07-AC1)
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           TextButton.icon(
+                            onPressed: () => _confirmDelete(context, kos),
+                            icon: const Icon(Icons.delete_outline, color: Colors.red, size: 18),
+                            label: const Text(
+                              'Hapus',
+                              style: TextStyle(color: Colors.red),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          FilledButton.tonalIcon(
                             onPressed: () async {
                               final updated = await Navigator.push<bool>(
                                 context,

@@ -132,6 +132,12 @@ class KosProvider extends ChangeNotifier {
     }
   }
 
+  /// Toggle status aktif / nonaktif kos sementara (US07-AC2).
+  Future<bool> toggleKosActive(KosModel kos) async {
+    final updated = kos.copyWith(isActive: !kos.isActive);
+    return await updateKos(updated);
+  }
+
   /// Menghapus kos milik sendiri (US07-AC1).
   Future<bool> deleteKos(String id) async {
     _isLoading = true;
