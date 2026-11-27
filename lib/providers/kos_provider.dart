@@ -27,6 +27,12 @@ class KosProvider extends ChangeNotifier {
   double? get maxPrice => _maxPrice;
   List<String> get selectedFacilities => _selectedFacilities;
 
+  /// Menandakan apakah sedang menerapkan pencarian atau filter
+  bool get isSearchingOrFiltering =>
+      _searchArea.trim().isNotEmpty ||
+      (_maxPrice != null && _maxPrice! > 0) ||
+      _selectedFacilities.isNotEmpty;
+
   /// Memuat daftar kos aktif dari Supabase.
   Future<void> fetchActiveKos() async {
     _isLoading = true;
@@ -50,6 +56,7 @@ class KosProvider extends ChangeNotifier {
 
   /// Memperbarui kata kunci pencarian area.
   void setSearchArea(String query) {
+    if (_searchArea == query) return;
     _searchArea = query;
     fetchActiveKos();
   }

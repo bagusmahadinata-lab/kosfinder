@@ -30,7 +30,7 @@
 ### Slice 2: Pencarian dan Filter
 | ID | Tujuan | Story & AC Terkait | Berkas yang Boleh Diubah | Cara Menguji | Status |
 |---|---|---|---|---|---|
-| **T04** | Pencarian kos berdasarkan teks area secara case-insensitive | US03-AC1, US03-AC3 | `lib/providers/kos_provider.dart`, `lib/screens/home_screen.dart`, `test/providers/kos_search_test.dart` | Ketik "singaraja" dan "Singaraja" di search bar; hasil identik; ketik teks acak untuk memverifikasi tampilan pesan data kosong. | Pending |
+| **T04** | Pencarian kos berdasarkan teks area secara case-insensitive | US03-AC1, US03-AC3 | `lib/providers/kos_provider.dart`, `lib/screens/home_screen.dart`, `test/providers/kos_search_test.dart` | Ketik "singaraja" dan "Singaraja" di search bar; hasil identik; ketik teks acak untuk memverifikasi tampilan pesan data kosong. | Selesai |
 | **T05** | Filter rentang harga maksimum dan checklist fasilitas | US03-AC2, US03-AC3 | `lib/providers/kos_provider.dart`, `lib/widgets/filter_dialog.dart`, `lib/screens/home_screen.dart`, `test/providers/kos_filter_test.dart` | Atur harga maksimum Rp1.000.000 dan centang "WiFi"; verifikasi hanya kos yang memenuhi kedua kriteria yang ditampilkan. | Pending |
 
 ### Slice 3: Login Pemilik
