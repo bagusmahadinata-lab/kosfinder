@@ -48,4 +48,4 @@
 ### Slice 5 (Bonus): Ketersediaan Kamar
 | ID | Tujuan | Story & AC Terkait | Berkas yang Boleh Diubah | Cara Menguji | Status |
 |---|---|---|---|---|---|
-| **T10** | Pembaruan ketersediaan kamar dinamis dan label "Penuh" otomatis | US06-AC1 (Bonus) | `lib/screens/kos_form_screen.dart`, `lib/widgets/kos_card.dart`, `lib/screens/kos_detail_screen.dart`, `lib/providers/kos_provider.dart` | Ubah sisa kamar menjadi 0; periksa katalog dan detail kos langsung menampilkan badge "Penuh". | Pending |
+| **T10** | Pembaruan ketersediaan kamar dinamis dan label "Penuh" otomatis | US06-AC1 (Bonus) | `lib/screens/kos_form_screen.dart`, `lib/widgets/kos_card.dart`, `lib/screens/kos_detail_screen.dart`, `lib/providers/kos_provider.dart` | Ubah sisa kamar menjadi 0; periksa katalog dan detail kos langsung menampilkan badge "Penuh". | Selesai |
