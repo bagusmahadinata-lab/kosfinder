@@ -36,7 +36,7 @@
 ### Slice 3: Login Pemilik
 | ID | Tujuan | Story & AC Terkait | Berkas yang Boleh Diubah | Cara Menguji | Status |
 |---|---|---|---|---|---|
-| **T06** | Otentikasi Pemilik Kos (Daftar, Masuk, Keluar) via Supabase Auth | US04-AC1, US04-AC2, US04-AC3, NFR05 | `lib/repositories/auth_repository.dart`, `lib/providers/auth_provider.dart`, `lib/screens/login_screen.dart`, `lib/screens/register_screen.dart`, `test/providers/auth_provider_test.dart` | Uji daftar akun baru; coba login dengan sandi salah (pesan error muncul); login dengan benar; logout; pencari tetap dapat melihat kos tanpa login. | Pending |
+| **T06** | Otentikasi Pemilik Kos (Daftar, Masuk, Keluar) via Supabase Auth | US04-AC1, US04-AC2, US04-AC3, NFR05 | `lib/repositories/auth_repository.dart`, `lib/providers/auth_provider.dart`, `lib/screens/login_screen.dart`, `lib/screens/register_screen.dart`, `test/providers/auth_provider_test.dart` | Uji daftar akun baru; coba login dengan sandi salah (pesan error muncul); login dengan benar; logout; pencari tetap dapat melihat kos tanpa login. | Selesai |
 
 ### Slice 4: Kelola Kos Milik Sendiri (CRUD & RLS)
 | ID | Tujuan | Story & AC Terkait | Berkas yang Boleh Diubah | Cara Menguji | Status |

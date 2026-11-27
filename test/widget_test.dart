@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kosfinder/main.dart';
 import 'package:kosfinder/models/kos_model.dart';
+import 'package:kosfinder/repositories/auth_repository.dart';
 import 'package:kosfinder/repositories/kos_repository.dart';
 
 class MockTestKosRepository extends KosRepository {
@@ -29,11 +30,19 @@ class MockTestKosRepository extends KosRepository {
   }
 }
 
+class MockTestAuthRepository extends AuthRepository {
+  @override
+  bool get isAuthenticated => false;
+}
+
 void main() {
   testWidgets('HomeScreen menampilkan judul dan kartu kos (US01-AC1)',
       (WidgetTester tester) async {
     await tester.pumpWidget(
-      KosFinderApp(kosRepository: MockTestKosRepository()),
+      KosFinderApp(
+        kosRepository: MockTestKosRepository(),
+        authRepository: MockTestAuthRepository(),
+      ),
     );
 
     // Judul App Bar

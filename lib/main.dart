@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/config/app_config.dart';
+import 'providers/auth_provider.dart';
 import 'providers/kos_provider.dart';
+import 'repositories/auth_repository.dart';
 import 'repositories/kos_repository.dart';
 import 'screens/home_screen.dart';
 
@@ -28,8 +30,13 @@ Future<void> main() async {
 
 class KosFinderApp extends StatelessWidget {
   final KosRepository? kosRepository;
+  final AuthRepository? authRepository;
 
-  const KosFinderApp({super.key, this.kosRepository});
+  const KosFinderApp({
+    super.key,
+    this.kosRepository,
+    this.authRepository,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +44,9 @@ class KosFinderApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(
           create: (_) => KosProvider(repository: kosRepository),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => AuthProvider(repository: authRepository),
         ),
       ],
       child: MaterialApp(

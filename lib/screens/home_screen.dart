@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
 import '../providers/kos_provider.dart';
 import '../widgets/filter_dialog.dart';
 import '../widgets/kos_card.dart';
 import 'about_screen.dart';
 import 'kos_detail_screen.dart';
+import 'login_screen.dart';
 
-/// Halaman utama katalog kos publik pencari kos dengan pencarian teks dan filter harga/fasilitas.
+/// Halaman utama katalog kos publik pencari kos dengan pencarian teks, filter, dan akses login pemilik.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -56,6 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<KosProvider>();
+    final authProvider = context.watch<AuthProvider>();
     final hasActiveFilter =
         (provider.maxPrice != null && provider.maxPrice! > 0) ||
         provider.selectedFacilities.isNotEmpty;
@@ -67,6 +70,52 @@ class _HomeScreenState extends State<HomeScreen> {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
+          // Tombol Masuk / Status Akun Pemilik (US04)
+          if (authProvider.isAuthenticated)
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.account_circle, color: Colors.indigo),
+              tooltip: 'Akun Pemilik',
+              onSelected: (val) {
+                if (val == 'logout') {
+                  authProvider.logout();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Berhasil keluar dari akun.')),
+                  );
+                }
+              },
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  enabled: false,
+                  child: Text(
+                    authProvider.user?.email ?? 'Pemilik Kos',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                const PopupMenuDivider(),
+                const PopupMenuItem(
+                  value: 'logout',
+                  child: Row(
+                    children: [
+                      Icon(Icons.logout, color: Colors.red, size: 20),
+                      SizedBox(width: 8),
+                      Text('Keluar / Logout', style: TextStyle(color: Colors.red)),
+                    ],
+                  ),
+                ),
+              ],
+            )
+          else
+            TextButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                );
+              },
+              icon: const Icon(Icons.login, size: 18),
+              label: const Text('Area Pemilik'),
+            ),
+
           IconButton(
             icon: const Icon(Icons.info_outline),
             tooltip: 'Tentang Aplikasi',
