@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/kos_provider.dart';
+import '../widgets/filter_dialog.dart';
 import '../widgets/kos_card.dart';
 import 'about_screen.dart';
 import 'kos_detail_screen.dart';
 
-/// Halaman utama katalog kos publik pencari kos dengan bilah pencarian teks area.
+/// Halaman utama katalog kos publik pencari kos dengan pencarian teks dan filter harga/fasilitas.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -30,8 +31,35 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
+  void _openFilterBottomSheet(BuildContext context) {
+    final provider = context.read<KosProvider>();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => FilterBottomSheet(
+        initialMaxPrice: provider.maxPrice,
+        initialFacilities: provider.selectedFacilities,
+        onApply: (maxPrice, facilities) {
+          provider.setFilters(
+            maxPrice: maxPrice,
+            facilities: facilities,
+          );
+        },
+        onReset: () {
+          provider.setFilters(maxPrice: null, facilities: []);
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<KosProvider>();
+    final hasActiveFilter =
+        (provider.maxPrice != null && provider.maxPrice! > 0) ||
+        provider.selectedFacilities.isNotEmpty;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -53,50 +81,66 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Column(
         children: [
-          // Bilah Pencarian Area (US03-AC1)
+          // Bilah Pencarian Area & Tombol Filter (US03-AC1, US03-AC2)
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Cari area, kampus, atau nama kos...',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                          context.read<KosProvider>().setSearchArea('');
-                          setState(() {});
-                        },
-                      )
-                    : null,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Cari area, kampus, nama...',
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: _searchController.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                _searchController.clear();
+                                context.read<KosProvider>().setSearchArea('');
+                                setState(() {});
+                              },
+                            )
+                          : null,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey.shade50,
+                    ),
+                    onChanged: (value) {
+                      setState(() {});
+                      context.read<KosProvider>().setSearchArea(value);
+                    },
+                  ),
                 ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
+                const SizedBox(width: 8),
+                // Tombol Buka Filter
+                Badge(
+                  isLabelVisible: hasActiveFilter,
+                  child: IconButton.filledTonal(
+                    onPressed: () => _openFilterBottomSheet(context),
+                    icon: const Icon(Icons.tune),
+                    tooltip: 'Filter Harga & Fasilitas',
+                  ),
                 ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
-                ),
-                filled: true,
-                fillColor: Colors.grey.shade50,
-              ),
-              onChanged: (value) {
-                setState(() {});
-                context.read<KosProvider>().setSearchArea(value);
-              },
+              ],
             ),
           ),
 
           // Konten Katalog Kos
           Expanded(
-            child: Consumer<KosProvider>(
-              builder: (context, provider, child) {
+            child: Builder(
+              builder: (context) {
                 // Kondisi 1: Sedang Memuat Data
                 if (provider.isLoading) {
                   return const Center(
@@ -178,7 +222,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         setState(() {});
                                       },
                                       icon: const Icon(Icons.clear_all),
-                                      label: const Text('Reset Pencarian'),
+                                      label: const Text('Reset Pencarian & Filter'),
                                     ),
                                   ],
                                 ],
