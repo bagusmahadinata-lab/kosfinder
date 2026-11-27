@@ -152,13 +152,16 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           TextButton.icon(
-                            onPressed: () {
-                              Navigator.push(
+                            onPressed: () async {
+                              final updated = await Navigator.push<bool>(
                                 context,
                                 MaterialPageRoute(
                                   builder: (_) => KosFormScreen(existingKos: kos),
                                 ),
                               );
+                              if (updated == true && mounted && authProvider.user != null) {
+                                kosProvider.fetchOwnerKos(authProvider.user!.id);
+                              }
                             },
                             icon: const Icon(Icons.edit, size: 18),
                             label: const Text('Ubah'),

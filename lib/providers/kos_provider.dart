@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/kos_model.dart';
 import '../repositories/kos_repository.dart';
 
@@ -96,7 +97,7 @@ class KosProvider extends ChangeNotifier {
     }
   }
 
-  /// Memperbarui data kos milik sendiri (US06-AC1).
+  /// Memperbarui data kos milik sendiri (US06-AC1 & US06-AC2).
   Future<bool> updateKos(KosModel kos) async {
     _isLoading = true;
     _errorMessage = null;
@@ -110,6 +111,18 @@ class KosProvider extends ChangeNotifier {
       }
       await fetchActiveKos();
       return true;
+    } on PostgrestException catch (e) {
+      // Penegakan RLS: Jika bukan pemilik asli, baris 0 atau izin ditolak
+      if (e.code == 'PGRST116' ||
+          e.message.toLowerCase().contains('policy') ||
+          e.message.toLowerCase().contains('permission') ||
+          e.message.toLowerCase().contains('row-level security')) {
+        _errorMessage =
+            'Akses ditolak: Anda tidak memiliki izin untuk mengubah kos ini (Proteksi RLS).';
+      } else {
+        _errorMessage = 'Gagal memperbarui kos: ${e.message}';
+      }
+      return false;
     } catch (e) {
       _errorMessage = 'Gagal memperbarui kos: $e';
       return false;
@@ -130,6 +143,16 @@ class KosProvider extends ChangeNotifier {
       _ownerKosList.removeWhere((k) => k.id == id);
       await fetchActiveKos();
       return true;
+    } on PostgrestException catch (e) {
+      if (e.code == 'PGRST116' ||
+          e.message.toLowerCase().contains('policy') ||
+          e.message.toLowerCase().contains('permission')) {
+        _errorMessage =
+            'Akses ditolak: Anda tidak memiliki izin untuk menghapus kos ini (Proteksi RLS).';
+      } else {
+        _errorMessage = 'Gagal menghapus kos: ${e.message}';
+      }
+      return false;
     } catch (e) {
       _errorMessage = 'Gagal menghapus kos: $e';
       return false;
