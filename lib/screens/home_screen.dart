@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/kos_provider.dart';
 import '../widgets/kos_card.dart';
+import 'about_screen.dart';
+import 'kos_detail_screen.dart';
 
 /// Halaman utama katalog kos publik pencari kos.
 class HomeScreen extends StatefulWidget {
@@ -29,7 +31,18 @@ class _HomeScreenState extends State<HomeScreen> {
           'KosFinder',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        centerTitle: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.info_outline),
+            tooltip: 'Tentang Aplikasi',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AboutScreen()),
+              );
+            },
+          ),
+        ],
       ),
       body: Consumer<KosProvider>(
         builder: (context, provider, child) {
@@ -114,7 +127,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 return KosCard(
                   kos: kos,
                   onTap: () {
-                    // Navigasi ke detail kos akan dihubungkan di Task T03
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => KosDetailScreen(kos: kos),
+                      ),
+                    );
                   },
                 );
               },
