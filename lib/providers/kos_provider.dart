@@ -54,6 +54,7 @@ class KosProvider extends ChangeNotifier {
             _selectedFacilities.isNotEmpty ? _selectedFacilities : null,
       );
     } catch (e) {
+      debugPrint('fetchActiveKos error: $e');
       _errorMessage = 'Gagal memuat data kos. Periksa koneksi internet Anda.';
     } finally {
       _isLoading = false;
