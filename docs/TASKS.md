@@ -23,7 +23,7 @@
 ### Slice 1: Katalog & Detail Kos (Publik)
 | ID | Tujuan | Story & AC Terkait | Berkas yang Boleh Diubah | Cara Menguji | Status |
 |---|---|---|---|---|---|
-| **T01** | Setup dependencies, konfigurasi Supabase Client via `--dart-define`, dan Model Data Kos | NFR02, US01-AC1 | `pubspec.yaml`, `lib/core/config/app_config.dart`, `lib/models/kos_model.dart`, `lib/repositories/kos_repository.dart`, `test/models/kos_model_test.dart` | Jalankan unit test model; verifikasi parsing JSON dan fallback nilai default berhasil. | Pending |
+| **T01** | Setup dependencies, konfigurasi Supabase Client via `--dart-define`, dan Model Data Kos | NFR02, US01-AC1 | `pubspec.yaml`, `lib/core/config/app_config.dart`, `lib/models/kos_model.dart`, `lib/repositories/kos_repository.dart`, `test/models/kos_model_test.dart` | Jalankan unit test model; verifikasi parsing JSON dan fallback nilai default berhasil. | Selesai |
 | **T02** | Menampilkan daftar katalog kos publik dengan penanganan koneksi gagal & data kosong | US01-AC1, US01-AC2, US01-AC3, NFR03, NFR04 | `lib/providers/kos_provider.dart`, `lib/screens/home_screen.dart`, `lib/widgets/kos_card.dart`, `lib/main.dart`, `test/providers/kos_provider_test.dart` | Jalankan aplikasi di HP/emulator; daftar kos tampil dari Supabase; matikan internet untuk verifikasi pesan error dan tombol reload tanpa crash. | Pending |
 | **T03** | Menampilkan detail lengkap kos, aksi Hubungi WhatsApp, dan Halaman About | US02-AC1, US02-AC2, DoD Identitas | `lib/screens/kos_detail_screen.dart`, `lib/screens/about_screen.dart`, `test/screens/kos_detail_screen_test.dart` | Tap salah satu kos; buka detail; tekan tombol WA (membuka link `wa.me`); buka layar About dan periksa identitas: `2415051023 - Dewa Putu Bagus Mahadinata`. | Pending |
 
