@@ -7,8 +7,9 @@ import '../widgets/kos_card.dart';
 import 'about_screen.dart';
 import 'kos_detail_screen.dart';
 import 'login_screen.dart';
+import 'owner_dashboard_screen.dart';
 
-/// Halaman utama katalog kos publik pencari kos dengan pencarian teks, filter, dan akses login pemilik.
+/// Halaman utama katalog kos publik pencari kos dengan pencarian teks, filter, dan akses kelola kos pemilik.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -70,13 +71,20 @@ class _HomeScreenState extends State<HomeScreen> {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
-          // Tombol Masuk / Status Akun Pemilik (US04)
+          // Tombol Masuk / Status Akun Pemilik (US04, US05)
           if (authProvider.isAuthenticated)
             PopupMenuButton<String>(
               icon: const Icon(Icons.account_circle, color: Colors.indigo),
               tooltip: 'Akun Pemilik',
               onSelected: (val) {
-                if (val == 'logout') {
+                if (val == 'dashboard') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const OwnerDashboardScreen(),
+                    ),
+                  );
+                } else if (val == 'logout') {
                   authProvider.logout();
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Berhasil keluar dari akun.')),
@@ -92,6 +100,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 const PopupMenuDivider(),
+                const PopupMenuItem(
+                  value: 'dashboard',
+                  child: Row(
+                    children: [
+                      Icon(Icons.dashboard_outlined, color: Colors.indigo, size: 20),
+                      SizedBox(width: 8),
+                      Text('Kelola Kos Saya'),
+                    ],
+                  ),
+                ),
                 const PopupMenuItem(
                   value: 'logout',
                   child: Row(

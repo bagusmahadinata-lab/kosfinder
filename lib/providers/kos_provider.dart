@@ -2,13 +2,16 @@ import 'package:flutter/foundation.dart';
 import '../models/kos_model.dart';
 import '../repositories/kos_repository.dart';
 
-/// Provider untuk mengelola state katalog kos publik dan filter pencarian.
+/// Provider untuk mengelola state katalog kos publik, filter pencarian, dan pengelolaan kos pemilik.
 class KosProvider extends ChangeNotifier {
   final KosRepository _repository;
 
   List<KosModel> _kosList = [];
   bool _isLoading = false;
   String? _errorMessage;
+
+  List<KosModel> _ownerKosList = [];
+  bool _isOwnerLoading = false;
 
   String _searchArea = '';
   double? _maxPrice;
@@ -23,6 +26,9 @@ class KosProvider extends ChangeNotifier {
   bool get hasError => _errorMessage != null;
   bool get isEmpty => !_isLoading && !hasError && _kosList.isEmpty;
 
+  List<KosModel> get ownerKosList => _ownerKosList;
+  bool get isOwnerLoading => _isOwnerLoading;
+
   String get searchArea => _searchArea;
   double? get maxPrice => _maxPrice;
   List<String> get selectedFacilities => _selectedFacilities;
@@ -33,7 +39,7 @@ class KosProvider extends ChangeNotifier {
       (_maxPrice != null && _maxPrice! > 0) ||
       _selectedFacilities.isNotEmpty;
 
-  /// Memuat daftar kos aktif dari Supabase.
+  /// Memuat daftar kos aktif dari Supabase (Publik).
   Future<void> fetchActiveKos() async {
     _isLoading = true;
     _errorMessage = null;
@@ -48,6 +54,85 @@ class KosProvider extends ChangeNotifier {
       );
     } catch (e) {
       _errorMessage = 'Gagal memuat data kos. Periksa koneksi internet Anda.';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Memuat daftar kos milik pemilik yang sedang login.
+  Future<void> fetchOwnerKos(String ownerId) async {
+    _isOwnerLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      _ownerKosList = await _repository.getOwnerKos(ownerId);
+    } catch (e) {
+      _errorMessage = 'Gagal memuat kos kelolaan Anda: $e';
+    } finally {
+      _isOwnerLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Menambah kos baru (US05-AC1).
+  Future<bool> createKos(KosModel kos) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final created = await _repository.createKos(kos);
+      _ownerKosList.insert(0, created);
+      await fetchActiveKos();
+      return true;
+    } catch (e) {
+      _errorMessage = 'Gagal menambah kos: $e';
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Memperbarui data kos milik sendiri (US06-AC1).
+  Future<bool> updateKos(KosModel kos) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final updated = await _repository.updateKos(kos);
+      final idx = _ownerKosList.indexWhere((k) => k.id == kos.id);
+      if (idx != -1) {
+        _ownerKosList[idx] = updated;
+      }
+      await fetchActiveKos();
+      return true;
+    } catch (e) {
+      _errorMessage = 'Gagal memperbarui kos: $e';
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Menghapus kos milik sendiri (US07-AC1).
+  Future<bool> deleteKos(String id) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _repository.deleteKos(id);
+      _ownerKosList.removeWhere((k) => k.id == id);
+      await fetchActiveKos();
+      return true;
+    } catch (e) {
+      _errorMessage = 'Gagal menghapus kos: $e';
+      return false;
     } finally {
       _isLoading = false;
       notifyListeners();
