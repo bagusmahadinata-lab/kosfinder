@@ -53,6 +53,9 @@ class KosProvider extends ChangeNotifier {
         facilities:
             _selectedFacilities.isNotEmpty ? _selectedFacilities : null,
       );
+    } on PostgrestException catch (e) {
+      debugPrint('fetchActiveKos postgrest error: ${e.message}');
+      _errorMessage = 'Database error: ${e.message}';
     } catch (e) {
       debugPrint('fetchActiveKos error: $e');
       _errorMessage = 'Gagal memuat data kos. Periksa koneksi internet Anda.';
