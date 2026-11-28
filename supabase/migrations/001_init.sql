@@ -96,3 +96,11 @@ CREATE TRIGGER trigger_kos_updated_at
 BEFORE UPDATE ON public.kos
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
+
+-- ====================================================================
+-- 6. GRANT HAK AKSES TABEL KE ROLE SUPABASE (anon & authenticated)
+-- ====================================================================
+GRANT USAGE ON SCHEMA public TO anon, authenticated;
+GRANT SELECT ON public.kos TO anon;
+GRANT ALL ON public.kos TO authenticated;
+
